@@ -1,0 +1,37 @@
+name: Documentation Deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed for pushing to gh-pages branch
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies (optional)
+        run: npm install || echo "No dependencies to install"
+
+      - name: Generate documentation
+        run: |
+          mkdir -p docs
+          echo "<html><body><h1>Project Documentation</h1><p>Last updated: $(date)</p></body></html>" > docs/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
