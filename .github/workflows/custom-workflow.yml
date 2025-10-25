@@ -1,0 +1,33 @@
+name: Generate Release Notes
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate release notes
+        id: notes
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release summary
+        run: |
+          mkdir -p release-summary
+          echo "Release notes generated on $(date)" > release-summary/summary.txt
+          echo "See draft release for details." >> release-summary/summary.txt
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-summary
+          path: release-summary
