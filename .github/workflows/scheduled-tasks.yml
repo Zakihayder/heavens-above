@@ -1,0 +1,37 @@
+name: Scheduled Tasks
+
+on:
+  schedule:
+    # Run once a day at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:   # allows manual trigger too
+
+jobs:
+  run-scheduled-tasks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run maintenance script
+        run: node run.js
+
+      - name: Upload logs
+        run: |
+          mkdir -p logs
+          echo "Task completed on $(date)" > logs/run-log.txt
+        # Save as artifact for verification
+      - name: Upload log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: schedule-logs
+          path: logs/
