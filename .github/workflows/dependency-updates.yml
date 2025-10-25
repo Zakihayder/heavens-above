@@ -1,0 +1,16 @@
+name: Dependency Update Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Audit dependencies for vulnerabilities
+        run: |
+          npm install
+          npm audit --audit-level=moderate || true
