@@ -1,0 +1,49 @@
+name: Deployment Pipeline (Simulated)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "No tests found, skipping."
+          fi
+
+      - name: Build project (if build script exists)
+        run: |
+          if npm run | grep -q "build"; then
+            npm run build
+          else
+            echo "No build step found, skipping."
+          fi
+
+      - name: Simulate Deployment
+        run: |
+          echo "Simulating deployment process..."
+          mkdir -p deployment-artifacts
+          cp -r * deployment-artifacts/ || true
+          echo "Deployment artifacts created!"
+
+      - name: Upload Deployment Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-files
+          path: deployment-artifacts
