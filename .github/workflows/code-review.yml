@@ -1,4 +1,4 @@
-name: Code Review Automation
+name: Code Review Workflow
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -20,7 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run ESLint (if available)
+      # ✅ Lint check
+      - name: Run lint check
         run: |
           if npm run | grep -q "lint"; then
             npm run lint
@@ -28,24 +29,17 @@ jobs:
             echo "No lint script found, skipping."
           fi
 
+      # ✅ Security check (optional)
       - name: Run security audit
         run: |
-          echo "Scanning for vulnerabilities..."
-          npm audit --audit-level=moderate || true
-
-      - name: Check code formatting
-        run: |
-          if npm run | grep -q "format"; then
-            npm run format --check || true
+          if npm audit; then
+            echo "Security check passed."
           else
-            echo "No format script found, skipping."
+            echo "Security vulnerabilities found!" && exit 1
           fi
 
-      - name: Comment PR summary
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          message: |
-            ✅ **Automated Code Review Results**
-            - Lint & formatting checked
-            - Security audit performed
-            - Please review warnings in the Actions logs if any
+      # ✅ Code quality check
+      - name: Check code style
+        run: |
+          echo "Checking code formatting..."
+          npx prettier --check . || echo "Formatting issues found."
